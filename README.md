@@ -37,3 +37,5 @@ Will only work on Firefox Developer or Nightly because it's unsigned.
 ```sh
 npm start
 ```
+
+![Terminal Preview](https://user-images.githubusercontent.com/31388661/190835341-d0165296-774f-4117-95a5-70495ef6d807.png)
