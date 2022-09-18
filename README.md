@@ -2,7 +2,7 @@
 
 ### Display currently playing song from YouTube Music on your Discord profile.
 
-![Discord Preview](https://user-images.githubusercontent.com/31388661/190833584-451c953c-c46f-4283-b072-5c4158ae89b1.png)
+![Discord Preview](https://user-images.githubusercontent.com/31388661/190917499-cecc9e88-7fda-444a-90d3-fcbc054e74f5.png)
 
 ## Dependencies
 
