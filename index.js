@@ -1,5 +1,4 @@
-const PORT = 3003;
-const APP_ID = '1020451441393029231';
+const CONFIG = JSON.parse(require('fs').readFileSync('config.json'));
 
 const express = require('express');
 const cors = require('cors');
@@ -11,7 +10,8 @@ app.use(cors());
 
 let lastTitle;
 let lastTime;
-let timeout = 0;
+let timeout;
+let cleared;
 
 app.post('/update', (req, res) => {
 	const data = req.body;
@@ -28,29 +28,42 @@ app.post('/update', (req, res) => {
 		return;
 	}
 
+	const subtitle = data.subtitle.split(' • ');
+	const author = subtitle[0];
+
 	if (lastTitle != data.title) {
-		console.log(`🎶 Now playing "${data.title}".`);
+		console.log(`🎶 Now playing "${data.title}" by "${author}".`);
 		timeout = 0;
 	}
 
 	const playing = lastTime != data.time;
-	if (!playing) {
-		if (++timeout > 60) {
-			console.log('😴 Was idle for 60 seconds, clearing activity.');
-			rpc.clearActivity();
-			return;
-		}
+
+	if (playing) {
+		timeout = Date.now();
+		cleared = false;
 	} else {
-		timeout = 0;
+		const time = (Date.now() - timeout) / 1000;
+		
+		if (CONFIG.IDLE_TIMEOUT_SECONDS > 0) {
+			if (!cleared && time >= CONFIG.IDLE_TIMEOUT_SECONDS) {
+				console.log('😴 Was idle for 60 seconds, clearing activity.');
+				rpc.clearActivity();
+				cleared = true;
+			}
+
+			if (cleared) {
+				return;
+			}
+		}
 	}
 
 	rpc.setActivity({
-		state: data.subtitle,
-		details: data.title + (data.time ? ` • ${data.time}` : ''),
+		state: subtitle.slice(1).join(' • '),
+		details: `${data.title} • ${author}`,
 		largeImageKey: 'logo',
 		largeImageText: 'ytm-rpc',
 		smallImageKey: lastTime ? (playing ? 'playing' : 'paused') : undefined,
-		smallImageText: playing ? 'Playing' : 'Paused',
+		smallImageText: (playing ? 'Playing' : 'Paused') + (data.time ? ` • ${data.time}` : ''),
 		buttons: data.url ? [{
 			label: 'Play',
 			url: data.url,
@@ -73,7 +86,7 @@ const connectToDiscord = () => {
 	rpc = new discord.Client({ transport: 'ipc' });
 	process.stdout.write('Connecting to Discord...');
 
-	rpc.login({ clientId: APP_ID }).then(() => {
+	rpc.login({ clientId: CONFIG.DISCORD_APP_ID }).then(() => {
 		connected = true;
 		console.log(' ✅.');
 	}).catch(() => {
@@ -94,7 +107,7 @@ const connectToDiscord = () => {
 };
 
 process.stdout.write('Starting ytm-rpc...');
-app.listen(PORT, () => {
+app.listen(CONFIG.LOCAL_PORT, () => {
 	console.log(' ✅.');
 	connectToDiscord();
 });

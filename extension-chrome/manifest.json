@@ -1,6 +1,11 @@
 {
 	"manifest_version": 3,
 	"name": "Discord Rich Presence for YouTube Music",
+	"browser_specific_settings": {
+		"gecko": {
+			"id": "ytm-rpc@jgraj.me"
+		}
+	},
 	"description": "Display currently playing song from YouTube Music on your Discord profile.",
 	"version": "1.0",
 	"content_scripts": [
