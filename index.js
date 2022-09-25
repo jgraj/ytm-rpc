@@ -1,4 +1,8 @@
-const CONFIG = JSON.parse(require('fs').readFileSync('config.json'));
+const CONFIG = {
+	LOCAL_PORT: 3003,
+	DISCORD_APP_ID: "1020451441393029231",
+	IDLE_TIMEOUT_SECONDS: 60,
+};
 
 const express = require('express');
 const cors = require('cors');
@@ -36,17 +40,16 @@ app.post('/update', (req, res) => {
 		timeout = 0;
 	}
 
-	const playing = lastTime != data.time;
+	const timeChanged = lastTime != data.time;
+	let time = (Date.now() - timeout) / 1000;
 
-	if (playing) {
+	if (timeChanged) {
 		timeout = Date.now();
 		cleared = false;
 	} else {
-		const time = (Date.now() - timeout) / 1000;
-		
 		if (CONFIG.IDLE_TIMEOUT_SECONDS > 0) {
 			if (!cleared && time >= CONFIG.IDLE_TIMEOUT_SECONDS) {
-				console.log('😴 Was idle for 60 seconds, clearing activity.');
+				console.log(`😴 Was idle for ${CONFIG.IDLE_TIMEOUT_SECONDS} seconds, clearing activity.`);
 				rpc.clearActivity();
 				cleared = true;
 			}
@@ -56,6 +59,8 @@ app.post('/update', (req, res) => {
 			}
 		}
 	}
+
+	const playing = timeChanged || time <= 1.2;
 
 	rpc.setActivity({
 		state: subtitle.slice(1).join(' • '),
@@ -97,6 +102,8 @@ const connectToDiscord = () => {
 			connectToDiscord();
 		}, 5000);
 	});
+
+	rpc.on('error', () => {});
 
 	rpc.on('disconnected', () => {
 		connected = false;

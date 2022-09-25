@@ -16,6 +16,6 @@ let loop;
 
 chrome.runtime.onMessage.addListener(() => {
 	if (!loop) {
-		loop = setInterval(update, 1000);
+		loop = setInterval(update, 100);
 	}
 });
