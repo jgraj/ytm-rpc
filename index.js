@@ -21,7 +21,7 @@ app.post('/update', (req, res) => {
 	const data = req.body;
 
 	if (!data.title || !data.subtitle) {
-		console.error('Invalid song data received. 😕')
+		console.error('Invalid song data received. 😕');
 		res.sendStatus(400);
 		return;
 	} else {
@@ -65,7 +65,7 @@ app.post('/update', (req, res) => {
 	rpc.setActivity({
 		state: subtitle.slice(1).join(' • '),
 		details: `${data.title} • ${author}`,
-		largeImageKey: 'logo',
+		largeImageKey: data.image || 'logo',
 		largeImageText: 'ytm-rpc',
 		smallImageKey: lastTime ? (playing ? 'playing' : 'paused') : undefined,
 		smallImageText: (playing ? 'Playing' : 'Paused') + (data.time ? ` • ${data.time}` : ''),
